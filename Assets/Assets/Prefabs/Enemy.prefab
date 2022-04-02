@@ -135,6 +135,7 @@ MonoBehaviour:
   FrameRate: 1
   clip: {fileID: 8300000, guid: 8f03951fee9bec9478d1ec979ba44677, type: 3}
   DistanceSoundLimit: 500
+  delayDestruction: 0.25
 --- !u!54 &2845468691168242807
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -164,7 +165,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   velocity: 0
-  moveToInitialHeight: 10
+  moveToInitialHeightMin: 10
+  moveToInitialHeightMax: 50
   attackMaterial: {fileID: 2100000, guid: c26895f9f0f456a49afe84fde1bd4231, type: 2}
   color: {r: 0, g: 0, b: 0, a: 0}
   meshRenderer: {fileID: 3397701554529567601}

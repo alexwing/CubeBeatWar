@@ -4,8 +4,8 @@ using UnityEngine;
 public class Target : MonoBehaviour
 {
     [SerializeField] private MeshRenderer _meshRenderer;
-   // [SerializeField] private Material _original;
-  //  [SerializeField] private Material _hit;
+    // [SerializeField] private Material _original;
+    //  [SerializeField] private Material _hit;
     [Tooltip("Detonation prefab")]
     public GameObject currentDetonator;
     [Tooltip("explosion effect Time")]
@@ -17,7 +17,7 @@ public class Target : MonoBehaviour
     public float detailLevel = 1.0f;
     private bool newHit = false;
 
-    private float currentTime =0;
+    private float currentTime = 0;
     [Tooltip("Ramdom explosion particles system")]
     [Range(0f, 1f)]
     public float ramdomExplosion = 0.22f;
@@ -29,6 +29,8 @@ public class Target : MonoBehaviour
     [Tooltip("Width of terrain destruction")]
     [Range(0, 1500)]
     public int DistanceSoundLimit = 500;
+
+    public float delayDestruction = 0.25f;
 
     private CubeBeatWar.EnemyController enemyController;
 
@@ -47,7 +49,7 @@ public class Target : MonoBehaviour
             {
                 newHit = false;
                 Debug.Log("currentTime: " + currentTime + ">" + _restoreTime);
-            //    _meshRenderer.material = _original;
+                //    _meshRenderer.material = _original;
                 //gameObject.GetComponent<TargetSnap>().interactable = false;
 
             }
@@ -59,39 +61,41 @@ public class Target : MonoBehaviour
         currentTime = 0;
         //gameObject.GetComponent<TargetSnap>().interactable = true;
         newHit = true;
-  //      _meshRenderer.material = _hit;
+        //      _meshRenderer.material = _hit;
 
         if (other.gameObject.name == "kamehameha")
         {
-            detonation(other);
-            Magic._hitCount++;        
-            enemyController.Hit();  
-            Destroy(gameObject, 0.25f);
-        }           
+            //delay detonation
+            StartCoroutine(detonation(other));
+
+            Magic._hitCount++;
+
+
+        }
     }
 
 
 
-
-    void detonation(Collider collision)
+    IEnumerator detonation(Collider collision)
     {
-
+                //float ExplosionVelocity = collision.GetComponent<KameHameHa>().Velocity;
+        // Debug.Log("Size" + collision.GetComponent<KameHameHa>().Size + " -- " + explosionSize + " -- " + ExplosionVelocity);
+        Debug.Log("velocity: " + collision.GetComponent<KameHameHa>().Velocity);
+        float normalizedValue = Mathf.InverseLerp(0, 1, (int)collision.GetComponent<KameHameHa>().Velocity);
+       // float normalizedValue = Mathf.InverseLerp(0, 100, (int)collision.GetComponent<KameHameHa>().Size);
+        int explosionSize = (int)Mathf.Lerp(1, 10, normalizedValue);
         Destroy(Instantiate(currentDetonator, collision.transform.position, Quaternion.identity), explosionLife);
 
-
-
-        float normalizedValue = Mathf.InverseLerp(0, 100, (int)collision.GetComponent<KameHameHa>().Size);
-        int explosionSize = (int)Mathf.Lerp(0, 10, normalizedValue);
-
-
-        //float ExplosionVelocity = collision.GetComponent<KameHameHa>().Velocity;
-        // Debug.Log("Size" + collision.GetComponent<KameHameHa>().Size + " -- " + explosionSize + " -- " + ExplosionVelocity);
+        yield return new WaitForSeconds(delayDestruction);;
 
         for (int i = 0; i < explosionSize; i++)
         {
-            Destroy(Instantiate(currentDetonator, Utils.RandomNearPosition(collision.transform, ramdomExplosion, 0f, ramdomExplosion).position, Quaternion.identity), explosionLife);
+            Destroy(Instantiate(currentDetonator, Utils.RandomNearPosition(this.transform, ramdomExplosion, 0f, ramdomExplosion).position, Quaternion.identity), explosionLife);
         }
-        Utils.PlaySound(clip, collision.transform, Camera.main.transform, DistanceSoundLimit);
+        Utils.PlaySound(clip, this.transform, Camera.main.transform, DistanceSoundLimit);
+        enemyController.Hit();
+        Destroy(this.gameObject);
+
 
     }
 

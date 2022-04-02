@@ -14,7 +14,7 @@ namespace CubeBeatWar
 
         //raycast to detect if the LineRenderer is over the menu item
 
-        public float activationTime = 0.5f;
+        private float activationTime = 0.5f;
 
         [HideInInspector]
         public float activationTimer = 0;
@@ -41,7 +41,7 @@ namespace CubeBeatWar
             if (other.gameObject.name == "Laser")
             {
                 
-                activationTimer = 0;
+                activationTimer = activationTime;
                 selectedBox.SetActive(true);
                 GameMenu.instance.setDescription(menuItem.description);
                 StartCoroutine(Activation());
@@ -51,10 +51,11 @@ namespace CubeBeatWar
         void OnTriggerExit(Collider other)
         {
             if (other.gameObject.name == "Laser")
-            {                 
+            {              
+                activationTimer = activationTime;   
                 GameMenu.instance.setDescription("");
                 selectedBox.SetActive(false);
-                StopCoroutine(Activation());
+                StopAllCoroutines();
             }
 
         }
@@ -69,8 +70,10 @@ namespace CubeBeatWar
                 selectedBox.transform.localScale = new Vector3(localScaleSelectedBox * activationTimer / activationTime, selectedBox.transform.localScale.y, selectedBox.transform.localScale.z);
                 yield return null;
             }
-            selectedBox.transform.localScale = new Vector3(0, selectedBox.transform.localScale.y, selectedBox.transform.localScale.z);
-            menuItem.onSelected.Invoke();
+                    selectedBox.transform.localScale = new Vector3(0, selectedBox.transform.localScale.y, selectedBox.transform.localScale.z);
+                    menuItem.onSelected.Invoke();
+ 
+
         }
 
 
