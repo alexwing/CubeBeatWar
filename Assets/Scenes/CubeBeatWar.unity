@@ -4165,6 +4165,11 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4223156527904808045, guid: ff3969fa14874314787f1acd8d0f3cb4,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: fbc6d4fe68d3fc64c8d7916df735b7a3, type: 2}
     - target: {fileID: 4223156527904808046, guid: ff3969fa14874314787f1acd8d0f3cb4,
         type: 3}
       propertyPath: m_Convex
@@ -13008,7 +13013,7 @@ PrefabInstance:
     - target: {fileID: 4221351585931979648, guid: 027a7bb4568252444b53b66d0f34afe2,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4221351585931979654, guid: 027a7bb4568252444b53b66d0f34afe2,
         type: 3}

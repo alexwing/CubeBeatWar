@@ -23,12 +23,12 @@ Material:
     m_Floats:
     - _Amplitude: 4.92
     - _AmplitudeX: 5
-    - _AmplitudeY: -8.3
-    - _InternalSquareSize: 1.53
-    - _Size: -0.15
+    - _AmplitudeY: 0.1
+    - _InternalSquareSize: 1.5
+    - _Size: 7.58
     - _Size2: 0.1
-    - _Speed: -0.5
-    - _Wave: 0.0442
+    - _Speed: -0.04
+    - _Wave: 0.0559
     - _Zoom: 6.1
     m_Colors:
     - _Color: {r: 0, g: 0, b: 0.25490198, a: 0}
