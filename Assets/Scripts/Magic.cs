@@ -20,8 +20,7 @@ public class Magic : MonoBehaviour
     [SerializeField] private Transform _kames;
 
     [Header("Hand")]
-    private Vector3 leftHandValid;
-    private Vector3 rightHandValid;
+
     private Vector3 lastPosition;
 
     private Vector3 LastLeftHand;
@@ -108,63 +107,70 @@ public class Magic : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (SceneConfig.gameIsPaused){
+        //Debug.Log("isPaused: " + SceneConfig.gameIsPaused);
+        if (SceneConfig.gameIsPaused)
+        {
             return;
         }
         // Measure the distance between both palms
-        distance = Vector3.Distance(leftHandValid, rightHandValid);
-        // limit kame hame size
-        if (distance > _kameHameMaxSize)
-        {
-            distance = _kameHameMaxSize;
-        }
         bool validPosition = false;
-        if (isValidController(OVRInput.Controller.LTouch))
+        if (isValidController(OVRInput.Controller.LHand) && isValidController(OVRInput.Controller.RHand))
         {
-            leftHandValid = this.transform.TransformPoint(OVRInput.GetLocalControllerPosition((OVRInput.Controller.LTouch)));
+            Vector3 leftHandValid = this.transform.TransformPoint(OVRInput.GetLocalControllerPosition((OVRInput.Controller.LHand)));
+            Vector3 rightHandValid = this.transform.TransformPoint(OVRInput.GetLocalControllerPosition((OVRInput.Controller.RHand)));
+            distance = Vector3.Distance(leftHandValid, rightHandValid);
+            // limit kame hame size
+            if (distance > _kameHameMaxSize)
+            {
+                distance = _kameHameMaxSize;
+            }
             validPosition = true;
+            //Debug.Log("distance: " + distance);
         }
-        if (isValidController(OVRInput.Controller.RTouch))
-        {
-            rightHandValid = this.transform.TransformPoint(OVRInput.GetLocalControllerPosition((OVRInput.Controller.RTouch)));
-            validPosition = true;
-        }
+        //Debug.Log("validPosition: " + validPosition);
         if (validPosition)
         {
+            //without oculus sdk
             Vector3 middlePosition = Utils.CenterOfVectors(new Vector3[] { LeftKameAnchor.transform.position, RightKameAnchor.transform.position });
             middlePosition = new Vector3(middlePosition.x, middlePosition.y + _kameHameHaPosition, middlePosition.z);
-
-            //in futures oculus sdk this must works
-            // Vector3 middlePositionVelocity = CenterOfVectors(new Vector3[] { OVRInput.GetLocalControllerVelocity((OVRInput.Controller.LTouch)), OVRInput.GetLocalControllerVelocity((OVRInput.Controller.RTouch)) });
             Vector3 middlePositionVelocity = Utils.CenterOfVectors(new Vector3[] { LeftHandAnchor.transform.localPosition, RightHandAnchor.transform.localPosition });
+
+
+
+            //in oculus sdk this must works OVRInput.Controller.LHand and OVRInput.Controller.RHand
+            //Vector3 middlePosition = Utils.CenterOfVectors(new Vector3[] { OVRInput.GetLocalControllerPosition((OVRInput.Controller.LHand)), OVRInput.GetLocalControllerPosition((OVRInput.Controller.RHand)) });
+            //middlePosition = new Vector3(middlePosition.x, middlePosition.y + _kameHameHaPosition, middlePosition.z);
+            //Vector3 middlePositionVelocity =  Utils.CenterOfVectors(new Vector3[] { OVRInput.GetLocalControllerPosition((OVRInput.Controller.LHand)), OVRInput.GetLocalControllerPosition((OVRInput.Controller.RHand)) });
+            
 
             //float speed = Vector3.Distance( new Vector3(0,0,lastPosition.z), new Vector3(0,0,middlePosition.z)) / Time.deltaTime;
             //float speed = (middlePositionVelocity.z -lastPosition.z) / Time.deltaTime;
 
-            //use OVRInput.GetLocalControllerVelocity() not vector3.distance
             float speed = Vector3.Distance(lastPosition, middlePositionVelocity) / Time.deltaTime;
 
-            float speed2 = Vector3.Distance(OVRInput.GetLocalControllerVelocity((OVRInput.Controller.LTouch)), OVRInput.GetLocalControllerVelocity((OVRInput.Controller.RTouch))) / Time.deltaTime;
+            //log OVRInput.GetLocalControllerVelocity() 
+            Debug.Log("OVRInput.GetLocalControllerVelocity() left: " + OVRInput.GetLocalControllerVelocity((OVRInput.Controller.LHand)) + " right: " + OVRInput.GetLocalControllerVelocity((OVRInput.Controller.RHand)));
 
-            //debug console speed 2 and speed
-            Debug.Log("speed 2: " + speed2 + " speed: " + speed);
+            //Debug.Log(" speed: " + speed);
 
-
-
-            float distanceNow  =  Vector3.Distance(middlePositionVelocity, HeadAnchor.transform.localPosition);
+            float distanceNow = Vector3.Distance(middlePositionVelocity, HeadAnchor.transform.localPosition);
             float distanceLast = Vector3.Distance(lastPosition, HeadAnchor.transform.localPosition);
-            
-            //only shoot if hands move to forward
-            if (distanceNow <= distanceLast)
-            {
-                speed = 0;
-            }
 
+            //only shoot if hands move to forward
+           // if (distanceNow <= distanceLast)
+           // {
+           //     speed = 0;
+          //  }
 
             Vector3 midway = Utils.CenterOfVectors(new Vector3[] { LeftKameAnchor.transform.forward, -RightKameAnchor.transform.forward, LastLeftHand, LastRightHand });
+            
+            //if inverse direction
+           // if (Vector3.Dot(midway, middlePositionVelocity) < 0)
+           // {
+           //     speed = 0; 
+           // }
 
-
-           // _aimPercentText.text = "Speed: " + String.Format("{0:0.00}", speed);
+            Console.WriteLine("Speed: " + String.Format("{0:0.00}", speed));
 
             //update previous positions
             lastPosition = middlePositionVelocity;
@@ -256,8 +262,7 @@ public class Magic : MonoBehaviour
         {
             float launchSpeed = Mathf.InverseLerp(handIntensityToShoot, handMaxIntensity, speed);
 
-
-            // _DistanceText.text = "launchSpeed: " + String.Format("{0:0.00}", launchSpeed);
+            Console.WriteLine("launchSpeed: " + String.Format("{0:0.00}", launchSpeed));
             AudioSourceKame.Stop();
 
             Utils.PlaySound(Launch, currentKame, this.transform, 1000);

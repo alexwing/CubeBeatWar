@@ -48,7 +48,7 @@ public class Target : MonoBehaviour
             if (currentTime > _restoreTime)
             {
                 newHit = false;
-                Debug.Log("currentTime: " + currentTime + ">" + _restoreTime);
+                //Debug.Log("currentTime: " + currentTime + ">" + _restoreTime);
                 //    _meshRenderer.material = _original;
                 //gameObject.GetComponent<TargetSnap>().interactable = false;
 

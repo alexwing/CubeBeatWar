@@ -4,8 +4,8 @@ Shader "Alexwing/Squares"
 
 	Properties{
 		//Properties
-		_Color("Spec Color", Color) = (0,0,0,0)
-		_Color2("Spec Color", Color) = (0,0,0,0)
+		[MainColor] _BaseColor("Spec Color", Color) = (0,0,0,0)
+		_BaseColor2("Spec Color", Color) = (0,0,0,0)
 		_Speed("Speed", Range(-10,10)) = 0.1
 		_Size("Size",  Range(-10,10)) = 0.1
 		_AmplitudeX("AmplitudeX", Range(-20.00,20.00)) = 5
@@ -56,8 +56,8 @@ Shader "Alexwing/Squares"
 		//Variables
 
 
-		fixed4 _Color;
-		fixed4 _Color2;
+		fixed4 _BaseColor;
+		fixed4 _BaseColor2;
 		float _Speed;
 		float _Size;
 		float _AmplitudeX;
@@ -115,7 +115,7 @@ Shader "Alexwing/Squares"
 
 			value += squareDist * _Wave;
 			//return fixed3(value,value,value,value);
-			return lerp(fixed4(_Color2.r, _Color2.g, _Color2.b,1.0),fixed4(_Color.r, _Color.g, _Color.b,1.0), value);
+			return lerp(fixed4(_BaseColor2.r, _BaseColor2.g, _BaseColor2.b,1.0),fixed4(_BaseColor.r, _BaseColor.g, _BaseColor.b,1.0), value);
 			///fragColor.a = 0.25*clamp(value, 0.0, 1.0);
 
 		}

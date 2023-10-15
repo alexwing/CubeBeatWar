@@ -511,17 +511,12 @@ public class Utils
 
     public static Vector3 CenterOfVectors(Vector3[] vectors)
     {
-        Vector3 sum = Vector3.zero;
-        if (vectors == null || vectors.Length == 0)
+        Vector3 center = Vector3.zero;
+        foreach (Vector3 vector in vectors)
         {
-            return sum;
+            center += vector;
         }
-
-        foreach (Vector3 vec in vectors)
-        {
-            sum += vec;
-        }
-        return sum / vectors.Length;
+        return center / vectors.Length;
     }
 
 

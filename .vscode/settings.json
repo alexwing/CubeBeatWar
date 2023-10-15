@@ -51,5 +51,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "CubeBeatWarQuest3.sln"
+    "dotnet.defaultSolution": "CubeBeatWarQuest3.sln",
+    "dotnet.preferCSharpExtension": true
 }
