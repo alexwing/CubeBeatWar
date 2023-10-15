@@ -1,222 +1,224 @@
 ﻿/*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * All rights reserved.
  *
  * This source code is licensed under the license found in the
  * LICENSE file in the root directory of this source tree.
  */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Meta.Voice.TelemetryUtilities;
 using UnityEditor;
 using UnityEngine;
+using Meta.WitAi.Data.Configuration;
 
-namespace Facebook.WitAi.Data.Configuration
+namespace Meta.WitAi.Windows
 {
-    public class WitWindow : BaseWitWindow
+    public class WitWindow : WitConfigurationWindow
     {
-        public static void ShowWindow()
-        {
-            if (WitAuthUtility.IsServerTokenValid())
-            {
-                GetWindow<WitWindow>("Wit Settings");
-            }
-            else
-            {
-                WitWelcomeWizard.ShowWizard(ShowWindow);
-            }
-        }
-
-        protected override string HeaderLink
-        {
-            get
-            {
-                if (null != witConfiguration && null != witConfiguration.application &&
-                    !string.IsNullOrEmpty(witConfiguration.application.id))
-                {
-                    return $"https://wit.ai/apps/{witConfiguration.application.id}/settings";
-                }
-
-                return null;
-            }
-        }
-
-        private Texture2D tex;
-        private bool manualToken;
-        protected Vector2 scroll;
-        protected WitConfigurationEditor witEditor;
+        protected WitConfigurationEditor witInspector;
         protected string serverToken;
-        protected bool welcomeSizeSet;
+        protected override GUIContent Title => WitTexts.SettingsTitleContent;
+        protected override string HeaderUrl => witInspector ? witInspector.HeaderUrl : base.HeaderUrl;
 
-        protected override void OnDrawContent()
-        {
-            if (!WitAuthUtility.IsServerTokenValid())
-            {
-                DrawWelcome();
-            }
-            else
-            {
-                DrawWit();
-            }
-        }
+        // VLog log level
+        private static int _logLevel = -1;
+        private static string[] _logLevelNames;
+        private static readonly VLogLevel[] _logLevels = (Enum.GetValues(typeof(VLogLevel)) as VLogLevel[])?.Reverse().ToArray();
 
-        protected virtual void SetWitEditor()
+#if VSDK_TELEMETRY_AVAILABLE
+        private static int _telemetryLogLevel = -1;
+        private static string[] _telemetryLogLevelNames;
+        private static readonly TelemetryLogLevel[] _telemetryLogLevels = new TelemetryLogLevel[]
+            { TelemetryLogLevel.Off, TelemetryLogLevel.Basic, TelemetryLogLevel.Verbose };
+#endif
+        public virtual bool ShowWitConfiguration => true;
+        public virtual bool ShowGeneralSettings => true;
+
+        public static bool ShowTooltips
         {
-            if (witConfiguration)
-            {
-                witEditor = (WitConfigurationEditor) Editor.CreateEditor(witConfiguration);
-                witEditor.drawHeader = false;
-                witEditor.Initialize();
-            }
+            get => EditorPrefs.GetBool("VSDK::Settings::Tooltips", true);
+            set => EditorPrefs.SetBool("VSDK::Settings::Tooltips", value);
         }
 
         protected override void OnEnable()
         {
-            WitAuthUtility.InitEditorTokens();
+            base.OnEnable();
+            if (string.IsNullOrEmpty(serverToken))
+            {
+                serverToken = WitAuthUtility.ServerToken;
+            }
+            RefreshLogLevel();
+            InitializeTelemetryLevelOptions();
             SetWitEditor();
-            RefreshConfigList();
         }
 
-        protected virtual void DrawWit()
+        protected virtual void SetWitEditor()
         {
-            // Recommended max size based on EditorWindow.maxSize doc for resizable window.
-            if (welcomeSizeSet)
+            // Destroy inspector
+            if (witInspector != null)
             {
-                welcomeSizeSet = false;
-                maxSize = new Vector2(4000, 4000);
+                DestroyImmediate(witInspector);
+                witInspector = null;
+            }
+            // Generate new inspector & initialize immediately
+            if (witConfiguration)
+            {
+                witInspector = (WitConfigurationEditor)Editor.CreateEditor(witConfiguration);
+                witInspector.drawHeader = false;
+                witInspector.Initialize();
+            }
+        }
+
+        protected override void LayoutContent()
+        {
+            if (ShowGeneralSettings) DrawGeneralSettings();
+            if (ShowWitConfiguration) DrawWitConfigurations();
+        }
+
+        private void DrawGeneralSettings()
+        {
+            // VLog level
+            bool updated = false;
+            RefreshLogLevel();
+            int logLevel = _logLevel;
+            WitEditorUI.LayoutPopup(WitTexts.Texts.VLogLevelLabel, _logLevelNames, ref logLevel, ref updated);
+            if (updated)
+            {
+                SetLogLevel(logLevel);
             }
 
-            titleContent = new GUIContent("Wit Configuration");
+            var showTooltips = ShowTooltips;
+            WitEditorUI.LayoutToggle(new GUIContent(WitTexts.Texts.ShowTooltipsLabel), ref showTooltips, ref updated);
+            if (updated)
+            {
+                ShowTooltips = showTooltips;
+            }
 
-            GUILayout.BeginVertical(EditorStyles.helpBox);
+#if VSDK_TELEMETRY_AVAILABLE && UNITY_EDITOR_WIN
+            var enableTelemetry = TelemetryConsentManager.ConsentProvided;
+            WitEditorUI.LayoutToggle(new GUIContent(WitTexts.Texts.TelemetryEnabledLabel), ref enableTelemetry, ref updated);
+            if (updated)
+            {
+                TelemetryConsentManager.ConsentProvided = enableTelemetry;
+            }
+
+            var telemetryLogLevel = _telemetryLogLevel;
+            WitEditorUI.LayoutPopup(WitTexts.Texts.TelemetryLevelLabel, _telemetryLogLevelNames, ref telemetryLogLevel, ref updated);
+            if (updated)
+            {
+                _telemetryLogLevel = Math.Max(0, telemetryLogLevel);
+                Telemetry.LogLevel = _telemetryLogLevels[_telemetryLogLevel];
+            }
+#endif
+        }
+
+        private void DrawWitConfigurations()
+        {
+            // Server access token
             GUILayout.BeginHorizontal();
-            if (null == serverToken)
+            bool updated = false;
+            WitEditorUI.LayoutPasswordField(WitTexts.SettingsServerTokenContent, ref serverToken, ref updated);
+            if (updated)
             {
-                serverToken = WitAuthUtility.ServerToken;
+                RelinkServerToken(false);
             }
-            serverToken = EditorGUILayout.PasswordField("Server Access Token", serverToken);
-            if (GUILayout.Button(WitStyles.PasteIcon, WitStyles.ImageIcon))
+            if (WitEditorUI.LayoutTextButton(WitTexts.Texts.SettingsRelinkButtonLabel))
             {
-                serverToken = EditorGUIUtility.systemCopyBuffer;
-                WitAuthUtility.ServerToken = serverToken;
-                RefreshContent();
+                RelinkServerToken(true);
             }
-            if (GUILayout.Button("Relink", GUILayout.Width(75)))
+            if (WitEditorUI.LayoutTextButton(WitTexts.Texts.SettingsAddButtonLabel))
             {
-                if (WitAuthUtility.IsServerTokenValid(serverToken))
-                {
-                    WitConfigurationEditor.UpdateTokenData(serverToken, RefreshContent);
-                }
-
-                WitAuthUtility.ServerToken = serverToken;
-                RefreshContent();
+                OpenConfigGenerationWindow();
             }
             GUILayout.EndHorizontal();
+            GUILayout.Space(WitStyles.ButtonMargin);
 
-            GUILayout.BeginHorizontal();
-            var configChanged = DrawWitConfigurationPopup();
-            if (GUILayout.Button("Create", GUILayout.Width(75)))
+            // Configuration select
+            base.LayoutContent();
+            // Update inspector if needed
+            if (witInspector == null || witConfiguration == null || witInspector.Configuration != witConfiguration)
             {
-                CreateConfiguration();
-            }
-            GUILayout.EndHorizontal();
-
-            if (witConfiguration && (configChanged || !witEditor))
-            {
-                WitConfiguration config = (WitConfiguration) witConfiguration;
                 SetWitEditor();
             }
 
-            if(witConfiguration && witEditor) witEditor.OnInspectorGUI();
-
-            GUILayout.EndVertical();
-        }
-
-        protected virtual void CreateConfiguration()
-        {
-            var asset = WitConfigurationEditor.CreateWitConfiguration(serverToken, Repaint);
-            if (asset)
+            // Layout configuration inspector
+            if (witConfiguration && witInspector)
             {
-                RefreshConfigList();
-                witConfigIndex = Array.IndexOf(witConfigs, asset);
-                witConfiguration = asset;
-                SetWitEditor();
+                witInspector.OnInspectorGUI();
             }
         }
 
-        protected virtual void DrawWelcome()
+        // Apply server token
+        private void RelinkServerToken(bool closeIfInvalid)
         {
-            titleContent = WitStyles.welcomeTitleContent;
-
-            if (!welcomeSizeSet)
+            // Open Setup if Invalid
+            bool invalid = !WitConfigurationUtility.IsServerTokenValid(serverToken);
+            if (invalid)
             {
-                minSize = new Vector2(450, 686);
-                maxSize = new Vector2(450, 686);
-                welcomeSizeSet = true;
+                // Clear if desired
+                if (string.IsNullOrEmpty(serverToken))
+                {
+                    WitAuthUtility.ServerToken = serverToken;
+                }
+                // Open New & Close
+                if (closeIfInvalid)
+                {
+                    // Generate new configuration
+                    OpenConfigGenerationWindow();
+                    // Close
+                    Close();
+                }
+                return;
             }
 
-            scroll = GUILayout.BeginScrollView(scroll);
+            // Set valid server token
+            WitAuthUtility.ServerToken = serverToken;
+            WitConfigurationUtility.SetServerToken(serverToken);
+        }
 
-            GUILayout.Label("Build Natural Language Experiences", WitStyles.LabelHeader);
-            GUILayout.Label(
-                "Enable people to interact with your products using voice and text.",
-                WitStyles.LabelHeader2);
-            GUILayout.Space(32);
-
-
-            BeginCenter(296);
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Paste your Server Access Token here", WitStyles.Label);
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button(WitStyles.PasteIcon, WitStyles.Label))
+        private static void RefreshLogLevel()
+        {
+            if (_logLevelNames != null && _logLevelNames.Length == _logLevels.Length)
             {
-                serverToken = EditorGUIUtility.systemCopyBuffer;
-                WitAuthUtility.ServerToken = serverToken;
-                if (WitAuthUtility.IsServerTokenValid())
+                return;
+            }
+            List<string> logLevelOptions = new List<string>();
+            foreach (var level in _logLevels)
+            {
+                logLevelOptions.Add(level.ToString());
+            }
+            _logLevelNames = logLevelOptions.ToArray();
+            VLog.Init();
+            _logLevel = logLevelOptions.IndexOf(VLog.EditorLogLevel.ToString());
+        }
+        private void SetLogLevel(int newLevel)
+        {
+            _logLevel = Mathf.Clamp(0, newLevel, _logLevels.Length);
+            VLog.EditorLogLevel = _logLevels[_logLevel];
+        }
+
+        private static void InitializeTelemetryLevelOptions()
+        {
+#if VSDK_TELEMETRY_AVAILABLE
+            _telemetryLogLevelNames = new string [_telemetryLogLevels.Length];
+            for (int i = 0; i < _telemetryLogLevelNames.Length; ++i)
+            {
+                _telemetryLogLevelNames[i] = _telemetryLogLevels[i].ToString();
+            }
+
+            var currentLevel = Telemetry.LogLevel.ToString();
+            for (int i = 0; i < _telemetryLogLevelNames.Length; ++i)
+            {
+                if (_telemetryLogLevelNames[i] == currentLevel)
                 {
-                    RefreshContent();
+                    _telemetryLogLevel = i;
+                    return;
                 }
             }
-            GUILayout.EndHorizontal();
-            if (null == serverToken)
-            {
-                serverToken = WitAuthUtility.ServerToken;
-            }
-            GUILayout.BeginHorizontal();
-            serverToken = EditorGUILayout.PasswordField(serverToken, WitStyles.TextField);
-            if (GUILayout.Button("Link", GUILayout.Width(75)))
-            {
-                WitAuthUtility.ServerToken = serverToken;
-                if (WitAuthUtility.IsServerTokenValid())
-                {
-                    RefreshContent();
-                }
-            }
-            GUILayout.EndHorizontal();
-            EndCenter();
-
-            BeginCenter();
-            GUILayout.Label("or", WitStyles.Label);
-            EndCenter();
-
-            BeginCenter();
-
-            if (GUILayout.Button(WitStyles.ContinueButton, WitStyles.Label, GUILayout.Height(50),
-                GUILayout.Width(296)))
-            {
-                Application.OpenURL("https://wit.ai");
-            }
-
-            GUILayout.Label(
-                "Please connect with Facebook login to continue using Wit.ai by clicking on the “Continue with Github Login” and following the instructions provided.",
-                WitStyles.Label,
-                GUILayout.Width(296));
-            EndCenter();
-
-            BeginCenter();
-            GUILayout.Space(16);
-
-            EndCenter();
-            GUILayout.EndScrollView();
+#endif
         }
     }
 }
