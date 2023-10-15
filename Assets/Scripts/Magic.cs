@@ -141,7 +141,15 @@ public class Magic : MonoBehaviour
             //float speed = Vector3.Distance( new Vector3(0,0,lastPosition.z), new Vector3(0,0,middlePosition.z)) / Time.deltaTime;
             //float speed = (middlePositionVelocity.z -lastPosition.z) / Time.deltaTime;
 
+            //use OVRInput.GetLocalControllerVelocity() not vector3.distance
             float speed = Vector3.Distance(lastPosition, middlePositionVelocity) / Time.deltaTime;
+
+            float speed2 = Vector3.Distance(OVRInput.GetLocalControllerVelocity((OVRInput.Controller.LTouch)), OVRInput.GetLocalControllerVelocity((OVRInput.Controller.RTouch))) / Time.deltaTime;
+
+            //debug console speed 2 and speed
+            Debug.Log("speed 2: " + speed2 + " speed: " + speed);
+
+
 
             float distanceNow  =  Vector3.Distance(middlePositionVelocity, HeadAnchor.transform.localPosition);
             float distanceLast = Vector3.Distance(lastPosition, HeadAnchor.transform.localPosition);
