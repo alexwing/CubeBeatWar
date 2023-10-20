@@ -2,7 +2,7 @@
 
 Cube Beat War allows players to cast the magical Kame Hame Ha with their hands in Mixed Reality. To do this, players must perform specific hand gestures, such as bringing their palms together and then opening them to generate magic, and pushing forward to cast it. The game includes a menu and a scoring system, and consists of eliminating colored cubes that appear randomly in the real environment. The game uses a gesture detection library that allows players to interact with the menu using the finger pointing gesture, as if it were a laser pointer. The game ends when all the cubes are eliminated. The application uses the Oculus XR plugin and requires Unity 2022.3.7f1 and an Oculus Quest 3 to work.
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/XJ0JKzzmJ5M/0.jpg)](https://youtu.be/XJ0JKzzmJ5M)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/mweYGYzR3dk/0.jpg)]([https://youtu.be/XJ0JKzzmJ5M](https://www.youtube.com/watch?v=mweYGYzR3dk))
 
 ## How to play
 
