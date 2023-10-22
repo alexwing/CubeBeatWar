@@ -1,9 +1,7 @@
 
 Shader "Alexwing/Squares"
 {
-
 	Properties{
-		//Properties
 		[MainColor] _BaseColor("Spec Color", Color) = (0,0,0,0)
 		_BaseColor2("Spec Color", Color) = (0,0,0,0)
 		_Speed("Speed", Range(-10,10)) = 0.1
@@ -15,22 +13,19 @@ Shader "Alexwing/Squares"
 		_InternalSquareSize("InternalSquareSize", Range(0,10.00)) = 2
 
 	}
-
-		SubShader
+	SubShader
 	{
-			Tags
-			{
-				"RenderPipeline" = "UniversalPipeline" 
-				"LightMode" = "UniversalForward" 
-				"IgnoreProjector" = "True"
-				"RenderType" = "Opaque"
-				"PreviewType" = "Plane"
-				"CanUseSpriteAtlas" = "True"
-			}
-
+		Tags
+		{
+			"RenderPipeline" = "UniversalPipeline" 
+			"LightMode" = "UniversalForward" 
+			"IgnoreProjector" = "True"
+			"RenderType" = "Opaque"
+			"PreviewType" = "Plane"
+			"CanUseSpriteAtlas" = "True"
+		}
 	Pass
 	{
-
 		CGPROGRAM
 		#pragma vertex vert
 		#pragma fragment frag
@@ -42,29 +37,14 @@ Shader "Alexwing/Squares"
 			fixed4 tangent : TANGENT;
 			fixed3 normal : NORMAL;
 			UNITY_VERTEX_INPUT_INSTANCE_ID //Insert
-			//VertexInput
 		};
-
-
 		struct v2f {
 			fixed4 pos : SV_POSITION;
 			fixed2 uv : TEXCOORD0;
 			UNITY_VERTEX_OUTPUT_STEREO //Insert
-			//v2f
 		};
-
-		//Variables
-
-
-		fixed4 _BaseColor;
-		fixed4 _BaseColor2;
-		float _Speed;
-		float _Size;
-		float _AmplitudeX;
-		float _AmplitudeY;
-		float _Zoom;
-		float _Wave;
-		float _InternalSquareSize;
+		fixed4 _BaseColor, _BaseColor2;
+		float _Speed, _Size, _AmplitudeX, _AmplitudeY, _Zoom, _Wave, _InternalSquareSize;
 
 		v2f vert(VertexInput v)
 		{
@@ -74,10 +54,6 @@ Shader "Alexwing/Squares"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o); //Insert			
 			o.pos = UnityObjectToClipPos(v.vertex);
 			o.uv = v.uv;
-			//add emissive color
-			
-
-			//VertexFactory
 			return o;
 		}
 
@@ -85,38 +61,22 @@ Shader "Alexwing/Squares"
 		{
 
 			fixed aspect = 1 / 1;
-			fixed value;
-			fixed2 uv = i.uv;
-			uv -= fixed2(0.5, 0.5 * aspect);
-			fixed rot = radians(45.0); // radians(45.0*sin(_Time.y));
-			fixed2 m = fixed2(cos(rot), -sin(rot))*_Zoom;
-			uv = m * uv;
-			uv += fixed2(0.5, 0.5 * aspect);
-			uv.y += 0.5 * (1.0 - aspect);
+			fixed2 uv = i.uv - fixed2(0.5, 0.5 * aspect);
+			fixed rot = radians(45.0);
+			fixed2 m = fixed2(cos(rot), -sin(rot)) * _Zoom;
+			uv = m * uv + fixed2(0.5, 0.5 * aspect) + fixed2(0.0, 0.5 * (1.0 - aspect));
 			fixed2 pos = 10.0 * uv;
 			fixed2 rep = frac(pos);
 			fixed dist = _InternalSquareSize * min(min(rep.x, 1.0 - rep.x), min(rep.y, 1.0 - rep.y));
 			fixed squareDist = length((floor(pos) + fixed2(0.5,0.5)) - fixed2(_AmplitudeX, _AmplitudeY));
-
 			fixed edge = sin(_Time.y - squareDist * 0.5) * 0.5 + 0.5;
-
 			edge = (_Time.y - squareDist * _Size) * _Speed;
 			edge = 2.0 * frac(edge * 0.5);
-			//value = 2.0*abs(dist-0.5);
-			//value = pow(dist, 2.0);
-			value = frac(dist * 2.0);
+			fixed value = frac(dist * 2.0);
 			value = lerp(value, 1.0 - value, step(1.0, edge));
-			//value *= 1.0-0.5*edge;
 			edge = pow(abs(1.0 - edge), 2.0);
-
-			//edge = abs(1.0-edge);
-			value = smoothstep(edge - 0.05, edge, 0.95 * value);
-
-
-			value += squareDist * _Wave;
-			//return fixed3(value,value,value,value);
-			return lerp(fixed4(_BaseColor2.r, _BaseColor2.g, _BaseColor2.b,1.0),fixed4(_BaseColor.r, _BaseColor.g, _BaseColor.b,1.0), value);
-			///fragColor.a = 0.25*clamp(value, 0.0, 1.0);
+			value = (smoothstep(edge - 0.05, edge, 0.95 * value)) + squareDist * _Wave;
+			return lerp(fixed4(_BaseColor2.rgb, 1.0), fixed4(_BaseColor.rgb, 1.0), value);
 
 		}
 		ENDCG
