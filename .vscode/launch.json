@@ -3,8 +3,10 @@
     "configurations": [
         {
             "name": "Attach to Unity",
-            "type": "vstuc",
-            "request": "attach"
+            "type": "unity",
+            "request": "attach",
+            "address": "localhost",
+            "port": 56000,           
         }
      ]
 }
