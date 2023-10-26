@@ -37,16 +37,36 @@ public class SamplePassthroughRoom : MonoBehaviour
 
     void Awake()
     {
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_ANDROID
-        OVRManager.eyeFovPremultipliedAlphaModeEnabled = false;
-#endif
+ // #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_ANDROID
+ //       OVRManager.eyeFovPremultipliedAlphaModeEnabled = false;
+ // #endif
         _sceneManager.SceneModelLoadedSuccessfully += InitializeRoom;
+
+
+        Debug.LogWarning("SamplePassthroughRoom Awake start");
+        if (_sceneManager == null)
+        {
+            _sceneManager = FindObjectOfType<OVRSceneManager>();
+        }
+        if (_sceneManager != null)
+        {
+            _sceneManager.SceneModelLoadedSuccessfully += InitializeRoom;
+        }
+        else
+        {
+            Debug.LogWarning("SamplePassthroughRoom Awake: _sceneManager is null");
+        }
+
+
+        Debug.LogWarning("SamplePassthroughRoom Awake end");
     }
 
     void InitializeRoom()
     {
+        Debug.LogWarning("SamplePassthroughRoom InitializeRoom");
         OVRSceneAnchor[] sceneAnchors = FindObjectsOfType<OVRSceneAnchor>();
         OVRSceneAnchor floorAnchor = null;
+        Debug.LogWarning("InitializeRoom: " + sceneAnchors.Length);
         if (sceneAnchors != null)
         {
             for (int i = 0; i < sceneAnchors.Length; i++)
