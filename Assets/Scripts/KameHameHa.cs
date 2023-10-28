@@ -27,7 +27,8 @@ public class KameHameHa : MonoBehaviour
         float cameraDistance = Vector3.Distance(SceneConfig.MainCamera.position, transform.position);
         if (cameraDistance > Distance)
         {
-            Destroy(gameObject);
+            Debug.Log("Destroy out of distance");
+            //Destroy(gameObject);
         }
     }
 
@@ -36,7 +37,8 @@ public class KameHameHa : MonoBehaviour
         bounceCount++;
         if (bounceCount > bounceLimit)
         {
-            Destroy(gameObject);
+            Debug.Log("Destroy out of bounce");
+            //Destroy(gameObject);
         }
     }
 
@@ -46,7 +48,8 @@ public class KameHameHa : MonoBehaviour
         currentTime++;
         if (currentTime > lifeTime)
         {
-            Destroy(gameObject);
+            Debug.Log("Destroy out of life time");
+            //Destroy(gameObject);
         }
     }
 

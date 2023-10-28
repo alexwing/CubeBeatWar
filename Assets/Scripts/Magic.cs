@@ -149,7 +149,7 @@ public class Magic : MonoBehaviour
             float speed = Vector3.Distance(lastPosition, middlePositionVelocity) / Time.deltaTime;
 
             //log OVRInput.GetLocalControllerVelocity() 
-            Debug.Log("OVRInput.GetLocalControllerVelocity() left: " + OVRInput.GetLocalControllerVelocity((OVRInput.Controller.LHand)) + " right: " + OVRInput.GetLocalControllerVelocity((OVRInput.Controller.RHand)));
+            //Debug.Log("OVRInput.GetLocalControllerVelocity() left: " + OVRInput.GetLocalControllerVelocity((OVRInput.Controller.LHand)) + " right: " + OVRInput.GetLocalControllerVelocity((OVRInput.Controller.RHand)));
 
             //Debug.Log(" speed: " + speed);
 
@@ -170,14 +170,25 @@ public class Magic : MonoBehaviour
            //     speed = 0; 
            // }
 
-            Console.WriteLine("Speed: " + String.Format("{0:0.00}", speed));
+            //Console.WriteLine("Speed: " + String.Format("{0:0.00}", speed));
 
             //update previous positions
             lastPosition = middlePositionVelocity;
             LastLeftHand = LeftKameAnchor.transform.forward;
             LastRightHand = -RightKameAnchor.transform.forward;
 
+            //debug
+            /* 
+            Debug.Log("distance: "          + String.Format("{0:0.00}", distance)  
+            + " speed rounded: "            + String.Format("{0:0.00}", speed) 
+            + " distanceNow: "              + String.Format("{0:0.00}", distanceNow) 
+            + " distanceLast: "             + String.Format("{0:0.00}", distanceLast)  
+            + " midway: "                   + String.Format("{0:0.00}", midway) 
+            + " middlePositionVelocity: "   + String.Format("{0:0.00}", middlePositionVelocity) 
+            + " kame?: " + ((distance > HandDistance * 0.5f && distance < HandDistance) ? "yes" : "no") );
+            */
 
+            //if hands are near and not exist kame
             if (distance > HandDistance * 0.5f && distance < HandDistance && currentKame == null)
             {
                 if (!kameLeftHand || !kameRightHand)
@@ -219,6 +230,7 @@ public class Magic : MonoBehaviour
 
     private void CreateEffect()
     {
+        Debug.Log("CreateEffect");
         // Generated after determining the effect at random
         index = UnityEngine.Random.Range(0, _magicArray.Length);
         currentKame = Instantiate(_magicArray[index], _kames.transform);
@@ -226,6 +238,10 @@ public class Magic : MonoBehaviour
         currentKame.transform.parent = _kames;
         currentKame.GetComponent<KameHameHa>().Distance = _destroyDistance;
 
+        //clean audio source
+        AudioSourceKame.Stop();
+
+        //play audio
         AudioSourceKame.clip = Create;
         AudioSourceKame.loop = true;
         AudioSourceKame.Play();

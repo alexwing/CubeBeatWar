@@ -78,7 +78,7 @@ namespace CubeBeatWar
             timeLapsed = 0.0f;
             enemiesDeaths = 0;
             hitScoreText.text = "Hits: " + enemiesDeaths.ToString() + " / " + enemiesInLevel.ToString();
-            StartCoroutine(CreateEnemies());
+            //StartCoroutine(CreateEnemies());
         }
         public void StopGame()
         {
@@ -102,8 +102,8 @@ namespace CubeBeatWar
             Gizmos.DrawLine(new Vector3(quadBottomRight.x, 0, quadBottomRight.y), new Vector3(quadBottomRight.x, 0, quadTopLeft.y));
             Gizmos.DrawLine(new Vector3(quadBottomRight.x, 0, quadTopLeft.y), new Vector3(quadTopLeft.x, 0, quadTopLeft.y));
             Gizmos.color = Color.green;
-            Gizmos.DrawSphere(new Vector3(quadTopLeft.x, 0, quadTopLeft.y), 1f);
-            Gizmos.DrawSphere(new Vector3(quadBottomRight.x, 0, quadBottomRight.y), 1f);
+            Gizmos.DrawSphere(new Vector3(quadTopLeft.x, 0, quadTopLeft.y), 0.2f);
+            Gizmos.DrawSphere(new Vector3(quadBottomRight.x, 0, quadBottomRight.y), 0.2f);
         }
         IEnumerator CreateEnemies()
         {

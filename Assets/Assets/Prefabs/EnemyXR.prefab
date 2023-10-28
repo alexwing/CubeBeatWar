@@ -192,8 +192,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   velocity: 0
-  moveToInitialHeightMin: 1
-  moveToInitialHeightMax: 12
+  moveToInitialHeightMin: 0
+  moveToInitialHeightMax: 2
   attackMaterial: {fileID: 2100000, guid: c26895f9f0f456a49afe84fde1bd4231, type: 2}
   color: {r: 0, g: 0, b: 0, a: 0}
   meshRenderer: {fileID: 3397701554529567601}
