@@ -178,7 +178,7 @@ public class Magic : MonoBehaviour
             LastRightHand = -RightKameAnchor.transform.forward;
 
             //debug
-            /* 
+             
             Debug.Log("distance: "          + String.Format("{0:0.00}", distance)  
             + " speed rounded: "            + String.Format("{0:0.00}", speed) 
             + " distanceNow: "              + String.Format("{0:0.00}", distanceNow) 
@@ -186,7 +186,7 @@ public class Magic : MonoBehaviour
             + " midway: "                   + String.Format("{0:0.00}", midway) 
             + " middlePositionVelocity: "   + String.Format("{0:0.00}", middlePositionVelocity) 
             + " kame?: " + ((distance > HandDistance * 0.5f && distance < HandDistance) ? "yes" : "no") );
-            */
+            
 
             //if hands are near and not exist kame
             if (distance > HandDistance * 0.5f && distance < HandDistance && currentKame == null)

@@ -78,7 +78,7 @@ namespace CubeBeatWar
             timeLapsed = 0.0f;
             enemiesDeaths = 0;
             hitScoreText.text = "Hits: " + enemiesDeaths.ToString() + " / " + enemiesInLevel.ToString();
-            //StartCoroutine(CreateEnemies());
+            StartCoroutine(CreateEnemies());
         }
         public void StopGame()
         {

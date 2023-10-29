@@ -30,7 +30,13 @@ public class Target : MonoBehaviour
     [Range(0, 1500)]
     public int DistanceSoundLimit = 500;
 
+    [Tooltip("Delay destruction")]
+    [Range(0, 2)]
     public float delayDestruction = 0.25f;
+
+    [Tooltip("Max destruction size")]
+    [Range(0, 100)]
+    public int maxDestructionSize = 10;
 
     private CubeBeatWar.EnemyController enemyController;
 
@@ -66,7 +72,7 @@ public class Target : MonoBehaviour
         if (other.gameObject.name == "kamehameha")
         {
             //delay detonation
-            StartCoroutine(detonation(other));
+           // StartCoroutine(detonation(other));
 
             Magic._hitCount++;
 
@@ -88,6 +94,10 @@ public class Target : MonoBehaviour
 
         yield return new WaitForSeconds(delayDestruction);;
 
+        if (explosionSize > maxDestructionSize)
+        {
+            explosionSize = maxDestructionSize;
+        }
         for (int i = 0; i < explosionSize; i++)
         {
             Destroy(Instantiate(currentDetonator, Utils.RandomNearPosition(this.transform, ramdomExplosion, 0f, ramdomExplosion).position, Quaternion.identity), explosionLife);

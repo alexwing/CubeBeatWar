@@ -28,7 +28,7 @@ public class KameHameHa : MonoBehaviour
         if (cameraDistance > Distance)
         {
             Debug.Log("Destroy out of distance");
-            //Destroy(gameObject);
+            Destroy(gameObject);
         }
     }
 
@@ -38,7 +38,7 @@ public class KameHameHa : MonoBehaviour
         if (bounceCount > bounceLimit)
         {
             Debug.Log("Destroy out of bounce");
-            //Destroy(gameObject);
+            Destroy(gameObject);
         }
     }
 
@@ -49,7 +49,7 @@ public class KameHameHa : MonoBehaviour
         if (currentTime > lifeTime)
         {
             Debug.Log("Destroy out of life time");
-            //Destroy(gameObject);
+            Destroy(gameObject);
         }
     }
 
