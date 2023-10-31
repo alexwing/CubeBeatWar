@@ -35,7 +35,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - HLOD
   - Spatial Awareness
   m_SortingLayers:
   - name: Default

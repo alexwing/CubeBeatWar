@@ -14,17 +14,34 @@ public class BouncingBallMgr : MonoBehaviour
     {
         if (!ballGrabbed && OVRInput.GetDown(actionBtn))
         {
-            currentBall = Instantiate(ball, rightControllerPivot.transform.position, Quaternion.identity);
-            currentBall.transform.parent = rightControllerPivot.transform;
-            ballGrabbed = true;
+           actionDown();
         }
 
         if (ballGrabbed && OVRInput.GetUp(actionBtn))
         {
+            actionUp();
+        }
+    }
+
+    public void actionDown()
+    {
+        Debug.Log("actionDown" + ballGrabbed);
+        if (!ballGrabbed)
+        {
+            currentBall = Instantiate(ball, rightControllerPivot.transform.position, Quaternion.identity);
+            currentBall.transform.parent = rightControllerPivot.transform;
+            ballGrabbed = true;
+        }
+    }
+    public void actionUp()
+    {
+        Debug.Log("actionUp" + ballGrabbed);
+        if (ballGrabbed)
+        {
             currentBall.transform.parent = null;
             var ballPos = currentBall.transform.position;
-            var vel = trackingspace.rotation * OVRInput.GetLocalControllerVelocity(OVRInput.Controller.RTouch);
-            var angVel = OVRInput.GetLocalControllerAngularVelocity(OVRInput.Controller.RTouch);
+            var vel = trackingspace.rotation * OVRInput.GetLocalControllerVelocity(OVRInput.Controller.RHand);
+            var angVel = OVRInput.GetLocalControllerAngularVelocity(OVRInput.Controller.RHand);
             currentBall.GetComponent<BouncingBallLogic>().Release(ballPos, vel, angVel);
             ballGrabbed = false;
         }
