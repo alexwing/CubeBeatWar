@@ -5,9 +5,9 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/MoonKameHame.unity
-    guid: daa86ac98c0bfdc40b0a074401955f8d
+  - enabled: 1
+    path: Assets/Scenes/CubeBeatWarXR2.unity
+    guid: 71b1890257887e5438d7db6ba0f5423e
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260,
       type: 2}

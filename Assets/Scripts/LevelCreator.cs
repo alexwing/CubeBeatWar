@@ -24,7 +24,7 @@ namespace CubeBeatWar
         [Tooltip("The number of enemies to spawn")]
         public int enemiesInLevel = 10;
         [Tooltip("Distance between enemies")]
-        public int enemiesDistanceBetween = 5;
+        public float enemiesDistanceBetween = 5;
         public float enemiesVelocity = 0.01f;
         [Tooltip("Time to wait before spawn new enemy")]
         public float enemiesCreationPeriod = 1f;
@@ -49,6 +49,10 @@ namespace CubeBeatWar
 
 
         private float timeLapsed = 0.0f;
+
+        private GameObject[] passthroughWalls;
+
+        private Vector3 centerOfRoom;
 
         private void Update()
         {
@@ -78,7 +82,19 @@ namespace CubeBeatWar
             timeLapsed = 0.0f;
             enemiesDeaths = 0;
             hitScoreText.text = "Hits: " + enemiesDeaths.ToString() + " / " + enemiesInLevel.ToString();
-            StartCoroutine(CreateEnemies());
+
+
+            //Find all objects with object name begining with "PassthroughWALL" and state is active
+            passthroughWalls = GameObject.FindGameObjectsWithTag("PassthroughWALL");
+
+            //get only active objects
+            passthroughWalls = System.Array.FindAll(passthroughWalls, x => x.activeSelf);
+
+            //get the center of the room from the all walls
+            centerOfRoom = Utils.GetCenterOfRoom(passthroughWalls);
+        
+            //StartCoroutine(CreateEnemies());
+            StartCoroutine(CreateEnemiesWalls());
         }
         public void StopGame()
         {
@@ -102,9 +118,70 @@ namespace CubeBeatWar
             Gizmos.DrawLine(new Vector3(quadBottomRight.x, 0, quadBottomRight.y), new Vector3(quadBottomRight.x, 0, quadTopLeft.y));
             Gizmos.DrawLine(new Vector3(quadBottomRight.x, 0, quadTopLeft.y), new Vector3(quadTopLeft.x, 0, quadTopLeft.y));
             Gizmos.color = Color.green;
-            Gizmos.DrawSphere(new Vector3(quadTopLeft.x, 0, quadTopLeft.y), 0.2f);
-            Gizmos.DrawSphere(new Vector3(quadBottomRight.x, 0, quadBottomRight.y), 0.2f);
+            Gizmos.DrawSphere(new Vector3(quadTopLeft.x, 0, quadTopLeft.y), 0.05f);
+            Gizmos.DrawSphere(new Vector3(quadBottomRight.x, 0, quadBottomRight.y), 0.05f);
         }
+
+
+        IEnumerator CreateEnemiesWalls()
+        {
+
+            while (true)
+            {
+                if (SceneConfig.gameIsPaused)
+                {
+                    yield return null;
+                }
+                else
+                {
+
+                    if (enemyCreationIndex < enemiesInLevel)
+                    {
+
+                        //get a ramdon wall
+                        GameObject wall = passthroughWalls[Random.Range(0, passthroughWalls.Length)];
+                        //get the mesh first of children of the wall
+                        Mesh mesh = wall.transform.GetChild(0).GetComponent<MeshFilter>().mesh;
+
+
+                        List<Vector3> enemyPositions = enemyList.ConvertAll(x => x.transform.position);
+
+
+                        // Random position from the mesh of walls
+                        Vector3 position = Utils.CreateRamdomPositionInWall(mesh,wall); 
+
+                        //ramdon end position from the center of the room and the position of the enemy
+                        Vector3 endPosition = new Vector3(Random.Range(centerOfRoom.x, position.x), Random.Range(centerOfRoom.y, position.y), Random.Range(centerOfRoom.z, position.z));
+                      
+
+                        GameObject enemy = Instantiate(enemyPrefab, position, Quaternion.identity) as GameObject;
+                        enemy.transform.parent = enemyContainer.transform;
+                        enemy.name = "enemy" + enemyCreationIndex;
+                        EnemyController enemyController = enemy.GetComponent<EnemyController>();
+                        enemyList.Add(enemyController);
+                        enemyController.velocity = enemiesVelocity;
+                        enemyController.endPosition = endPosition;
+                        enemyController.color = enemyColors[enemyCreationIndex % enemyColors.Length];
+                        enemyController.appearEnemy();
+
+                        enemyCreationIndex++;
+
+                        //random time
+                        float ramdomizeTime = Random.Range(0, enemiesCreationPeriod * 1000) / 1000;
+
+                        yield return new WaitForSeconds(ramdomizeTime);
+
+                    }
+                    else
+                    {
+                        StopCoroutine(CreateEnemiesWalls());
+                        yield return null;
+                    }
+                }
+            }
+        }
+
+
         IEnumerator CreateEnemies()
         {
 

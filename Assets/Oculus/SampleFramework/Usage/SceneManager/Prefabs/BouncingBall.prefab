@@ -125,7 +125,7 @@ MonoBehaviour:
   bounce: {fileID: 8300000, guid: 229f46af248b4c74facf863a061f856b, type: 3}
   loadball: {fileID: 8300000, guid: e73b66c29312de047ba040fb2231cdda, type: 3}
   visibleMat: {fileID: 2100000, guid: 517b443e8981c3546aaaba9c17b9d030, type: 2}
-  hiddenMat: {fileID: 2100000, guid: 9827083418370bd4383a7507ca039547, type: 2}
+  hiddenMat: {fileID: 2100000, guid: 517b443e8981c3546aaaba9c17b9d030, type: 2}
 --- !u!54 &413594911
 Rigidbody:
   m_ObjectHideFlags: 0

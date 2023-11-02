@@ -9,6 +9,8 @@ namespace CubeBeatWar
     public class GameMenu : MonoBehaviour
     {
 
+        [Tooltip("If true, the game will run on start")]
+        public bool gameRunOnStart;
 
         public GameObject menuContainer;
         public GameObject scoreContainer;
@@ -26,7 +28,7 @@ namespace CubeBeatWar
 
         public static GameMenu instance;
 
-        
+
 
         public void Awake()
         {
@@ -35,11 +37,24 @@ namespace CubeBeatWar
 
         public void Start()
         {   
-            SceneConfig.gameIsPaused = true;
-            menuContainer.SetActive(true);
-            hallOfFamePrefab.SetActive(true);
-            scoreContainer.SetActive(false);
             createMenu();
+            SceneConfig.gameIsPaused = !gameRunOnStart;
+
+            if (SceneConfig.gameIsPaused)
+            {
+                showMenu();
+            }
+            else
+            {
+                hideMenu();
+                //launch game get the first menu item
+                if (menuItems.Count > 1)
+                {
+                    Debug.Log("Start the game: " + menuItems[1].name);
+                    menuItems[1].onSelected.Invoke();
+                }
+
+            }
         }
 
         public void disableSelectedMenus()

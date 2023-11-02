@@ -575,6 +575,51 @@ public class Utils
 
     }
 
+// CreateRamdomPositionInWall
+    /// <summary>
+    /// Create ramdon postion from meshed wall
+    /// </summary>
+    /// <param name="wall">wall</param>
+    /// <returns>Return the randomized position</returns>
+    public static Vector3 CreateRamdomPositionInWall(Mesh wall, GameObject wallObject)
+    {
+        Vector3 position = new Vector3(0, 0, 0);
+        bool isInRange = false;
+        while (!isInRange)
+        {
+            isInRange = true;
+            position = new Vector3(UnityEngine.Random.Range(wall.bounds.min.x, wall.bounds.max.x), UnityEngine.Random.Range(wall.bounds.min.y, wall.bounds.max.y), UnityEngine.Random.Range(wall.bounds.min.z, wall.bounds.max.z));
+            if (!wall.bounds.Contains(position))
+            {
+                isInRange = false;
+            }
+        }
+        //transform to world position
+        position = wallObject.transform.TransformPoint(position);
+
+        //Debug.Log("CreateRamdomPositionInWall: " + position + " wall.bounds: " + wall.bounds + "isInRange: " + isInRange);
+        return position;
+
+    }
+
+    //GetCenterOfRoom 
+    /// <summary>
+    /// Get center of room
+    /// </summary>
+    /// <param name="walls">walls</param>
+    /// <returns>Return the center of room</returns>
+    public static Vector3 GetCenterOfRoom(GameObject[] walls)
+    {
+        Vector3 center = new Vector3(0, 0, 0);
+        for (int i = 0; i < walls.Length; i++)
+        {
+            center += walls[i].transform.position;
+        }
+        center = center / walls.Length;
+        return center;
+    }
+    
+
     public static Color Darken(Color color, float darkenAmount)
     {
         return Color.Lerp(color, Color.black, darkenAmount);
@@ -596,6 +641,23 @@ public class Utils
         painterObject.SetPropertyBlock(propBlock);
 
     }
+
+    /// <summary>
+    /// change the float of the object renderer copy instance
+    /// </summary>
+    /// <param name="painterObject">Renderer to paint</param>
+    /// <param name="value">value to paint</param>
+    /// <param name="name">Shader variable</param>
+    /// <returns>none</returns>
+    public static void ChangeFloat(Renderer painterObject, float value, string name = "_Speed")
+    {
+        var propBlock = new MaterialPropertyBlock();
+        painterObject.GetPropertyBlock(propBlock);
+        propBlock.SetFloat(name, value);
+        painterObject.SetPropertyBlock(propBlock);
+
+    }    
+
 
     public static bool DoubleClick()
     {
